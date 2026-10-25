@@ -356,13 +356,16 @@ $('#tema').onchange = e => { S.tema = e.target.value; save(); aplicarTema(); };
 /* ---------- Google Calendar (base de datos) ---------- */
 const GKEY = 'comidas-google';
 let G; try { G = JSON.parse(localStorage.getItem(GKEY)) || {}; } catch { G = {}; }
-G = {clientId:'', calId:'', on:false, dirty:false, sincronizado:false, ...G};
+G = {clientId:'', calId:'', on:false, dirty:false, sincronizado:false, sesion:'', ...G};
 const saveG = () => { try { localStorage.setItem(GKEY, JSON.stringify(G)); } catch {} };
 const clientId = () => (window.CONFIG && window.CONFIG.googleClientId) || G.clientId;
 const SCOPES = 'https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.calendarlist.readonly';
 const ICS_DIAS = ['SU','MO','TU','WE','TH','FR','SA'];
 const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 let token = null, tokenExp = 0, ocupado = false, tmrSync;
+const TKEY = 'comidas-token';
+try { const t = JSON.parse(localStorage.getItem(TKEY)); if (t && t.exp > Date.now()) { token = t.token; tokenExp = t.exp; } } catch {}
+const guardarToken = () => { try { token ? localStorage.setItem(TKEY, JSON.stringify({token, exp:tokenExp})) : localStorage.removeItem(TKEY); } catch {} };
 
 function cargarGIS(){
   if (window.google && google.accounts) return Promise.resolve();
@@ -373,13 +376,40 @@ function cargarGIS(){
     document.head.appendChild(s);
   });
 }
+/* Con servidor (authUrl): el refresh token vive cifrado en G.sesion y el Worker renueva el acceso sin pedir nada. */
+const authUrl = () => (window.CONFIG && window.CONFIG.authUrl) || '';
+async function llamarAuth(ruta, cuerpo){
+  const r = await fetch(authUrl() + ruta, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(cuerpo)});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.error || ('Error ' + r.status)), {codigo: j.error});
+  return j;
+}
+async function pedirCodigo(){
+  await cargarGIS();
+  return new Promise((ok, mal) => {
+    google.accounts.oauth2.initCodeClient({
+      client_id: clientId(), scope: SCOPES, ux_mode: 'popup', select_account: true, prompt: 'consent',
+      callback: r => r.error ? mal(new Error(r.error)) : ok(r.code),
+      error_callback: e => mal(new Error(e.type || 'cancelado'))
+    }).requestCode();
+  });
+}
+function guardarAcceso(j){ token = j.access_token; tokenExp = Date.now() + j.expires_in*1000; guardarToken(); }
 async function pedirToken(prompt){
+  if (authUrl()){
+    if (!G.sesion) throw new Error('Falta conectar con Google');
+    try { guardarAcceso(await llamarAuth('/auth/refresh', {sesion: G.sesion})); return; }
+    catch (e) {
+      if (e.codigo === 'invalid_grant'){ G.sesion = ''; saveG(); throw new Error('Hay que volver a conectar con Google'); }
+      throw e;
+    }
+  }
   if (!clientId()) throw new Error('Falta el ID de cliente de Google');
   await cargarGIS();
   return new Promise((ok, mal) => {
     google.accounts.oauth2.initTokenClient({
       client_id: clientId(), scope: SCOPES,
-      callback: r => { if (r.error) return mal(new Error(r.error)); token = r.access_token; tokenExp = Date.now() + r.expires_in*1000; ok(); },
+      callback: r => { if (r.error) return mal(new Error(r.error)); token = r.access_token; tokenExp = Date.now() + r.expires_in*1000; guardarToken(); ok(); },
       error_callback: e => mal(new Error(e.type || 'cancelado'))
     }).requestAccessToken({prompt});
   });
@@ -392,7 +422,7 @@ async function api(path, opt = {}, reintento = true){
     headers: {Authorization: 'Bearer ' + token, 'Content-Type': 'application/json'},
     body: opt.body ? JSON.stringify(opt.body) : undefined
   });
-  if (r.status === 401 && reintento){ token = null; return api(path, opt, false); }
+  if (r.status === 401 && reintento){ token = null; guardarToken(); return api(path, opt, false); }
   if (r.status === 204) return null;
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error((j.error && j.error.message) || ('Error ' + r.status));
@@ -464,7 +494,7 @@ function estadoG(t){ $('#gEstado').textContent = t; }
 async function sincronizar(manual, auto){
   if (!G.on || ocupado) return;
   // Sin una sesión vigente Google pide elegir cuenta en una ventana, y el navegador solo la permite tras un toque.
-  if (auto && !tokenVigente()){ estadoG(G.dirty ? 'Hay cambios sin guardar en Google. Toca "Sincronizar ahora".' : 'Toca "Sincronizar ahora" para ponerte al día.'); return; }
+  if (auto && !tokenVigente() && !G.sesion){ estadoG(G.dirty ? 'Hay cambios sin guardar en Google. Toca "Sincronizar ahora".' : 'Toca "Sincronizar ahora" para ponerte al día.'); return; }
   ocupado = true; estadoG('Sincronizando…');
   try {
     if (manual && !tokenVigente()) await pedirToken('');
@@ -486,30 +516,45 @@ function renderGoogle(){
   $('#gClientId').value = G.clientId;
   $('#gConectar').hidden = G.on; $('#gSync').hidden = !G.on; $('#gSalir').hidden = !G.on;
 }
-$('#gConectar').onclick = async () => {
+async function conectarGoogle(){
   if (!(window.CONFIG && window.CONFIG.googleClientId)) G.clientId = $('#gClientId').value.trim();
   if (!clientId()) { toast('Pega primero el ID de cliente'); return; }
-  try { await pedirToken('select_account'); } catch (err) { estadoG('No se pudo conectar (' + err.message + ')'); return; }
-  G.on = true; G.sincronizado = false; saveG(); renderGoogle();
+  try {
+    if (authUrl()){
+      const j = await llamarAuth('/auth/code', {code: await pedirCodigo()});
+      G.sesion = j.sesion; guardarAcceso(j);
+    } else await pedirToken('select_account');
+  } catch (err) {
+    const m = err.codigo === 'sin_refresh'
+      ? 'Google no dio el permiso permanente. Quita "Mis Comidas" en tu cuenta de Google (Seguridad → Conexiones con terceros) y conecta de nuevo'
+      : 'No se pudo conectar (' + err.message + ')';
+    estadoG(m); toast('No se pudo conectar'); return;
+  }
+  if (!G.on) G.sincronizado = false;
+  G.on = true; saveG(); renderGoogle();
   sincronizar(true);
-};
+}
+$('#gConectar').onclick = conectarGoogle;
 $('#gSync').onclick = () => sincronizar(true);
 $('#gSalir').onclick = () => {
   if (!confirm('¿Desconectar de Google? Las comidas se quedan en este teléfono y en el calendario.')) return;
-  if (token && window.google) google.accounts.oauth2.revoke(token);
-  token = null; G = {...G, on:false, calId:'', dirty:false, sincronizado:false}; saveG();
+  if (authUrl() && G.sesion) llamarAuth('/auth/revoke', {sesion: G.sesion}).catch(() => {});
+  else if (token && window.google) google.accounts.oauth2.revoke(token);
+  token = null; guardarToken(); G = {...G, on:false, calId:'', dirty:false, sincronizado:false, sesion:''}; saveG();
   estadoG(''); renderGoogle();
 };
 document.addEventListener('visibilitychange', () => { if (!document.hidden) sincronizar(false, true); });
-// Google solo deja renovar el acceso tras un toque del usuario: este aviso amable pide ese toque ("Vale") y aprovecha para sincronizar.
-let ultimoRecuerdo = 0;
+// Sin servidor, Google solo deja renovar el acceso tras un toque del usuario: este aviso amable pide ese toque ("Vale") y aprovecha para sincronizar.
+// Con servidor, el aviso solo sale una vez para conectar la cuenta de forma permanente.
 function recordarSync(){
-  if (!G.on || ocupado || tokenVigente() || Date.now() - ultimoRecuerdo < 30*60000) return;
+  if (!G.on || ocupado || tokenVigente() || G.sesion) return;
+  if (!G.dirty && G.recuerdo === hoyStr()) return;     // sin cambios pendientes, solo una vez al día
   if (document.querySelector('dialog[open]')) return;
-  ultimoRecuerdo = Date.now();
+  G.recuerdo = hoyStr(); saveG();
+  $('#recuerdaTexto').textContent = authUrl() ? 'Conecta tu cuenta de Google una sola vez para que tus comidas se sincronicen solas.' : 'No te olvides de agregar tus comidas de esta semana.';
   $('#recuerda').showModal();
 }
-$('#recuerdaOk').onclick = () => { $('#recuerda').close(); sincronizar(true); };
+$('#recuerdaOk').onclick = () => { $('#recuerda').close(); if (authUrl() && !G.sesion) conectarGoogle(); else sincronizar(true); };
 /* ---------- Navegación ---------- */
 function irA(v){
   document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x.dataset.v === v));
