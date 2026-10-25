@@ -1,5 +1,5 @@
-const CACHE = 'comidas-v5';
-const FILES = ['./', './index.html', './styles.css', './app.js', './config.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './badge-96.png', './alerta.png', './ansioso.gif', './img/feliz.svg', './img/hola.svg', './img/vacio.svg', './img/ico-des.svg', './img/ico-col.svg', './img/ico-com.svg', './img/ico-cen.svg', './img/ico-otro.svg'];
+const CACHE = 'comidas-v6';
+const FILES = ['./', './index.html', './styles.css', './app.js', './config.js', './manifest.webmanifest', './icon-192.png', './apple-touch-icon.png', './icon-512.png', './icon-maskable-512.png', './badge-96.png', './alerta.png', './ansioso.gif', './img/feliz.svg', './img/hola.svg', './img/vacio.svg', './img/ico-des.svg', './img/ico-col.svg', './img/ico-com.svg', './img/ico-cen.svg', './img/ico-otro.svg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
   self.skipWaiting();
