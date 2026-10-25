@@ -300,12 +300,6 @@ function revisarRecordatorios(){
   });
   renderHoy();
 }
-$('#probarAviso').onclick = async () => {
-  if (hayNotif && Notification.permission === 'default') { await Notification.requestPermission(); estadoNotif(); }
-  const c = {id:'prueba', nombre:'Comida', hora:`${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`, alimentos:['Pollo', 'Arroz blanco hervido']};
-  notificar(tituloAviso(c, ahoraMin()), cuerpoAviso(c)); mostrarAlerta(c, ahoraMin());
-};
-
 /* ---------- Ajustes / respaldo ---------- */
 $('#aviso').value = S.anticipacion;
 $('#aviso').onchange = e => { S.anticipacion = +e.target.value; save(); cambio(); toast('Guardado ✓'); };
@@ -424,8 +418,10 @@ async function bajar(){
 }
 
 function estadoG(t){ $('#gEstado').textContent = t; }
-async function sincronizar(manual){
+async function sincronizar(manual, auto){
   if (!G.on || ocupado) return;
+  // Sin una sesión vigente Google pide elegir cuenta en una ventana, y el navegador solo la permite tras un toque.
+  if (auto && !tokenVigente()){ estadoG(G.dirty ? 'Hay cambios sin guardar en Google. Toca "Sincronizar ahora".' : 'Toca "Sincronizar ahora" para ponerte al día.'); return; }
   ocupado = true; estadoG('Sincronizando…');
   try {
     if (manual && !tokenVigente()) await pedirToken('');
@@ -461,7 +457,7 @@ $('#gSalir').onclick = () => {
   token = null; G = {...G, on:false, calId:'', dirty:false, sincronizado:false}; saveG();
   estadoG(''); renderGoogle();
 };
-document.addEventListener('visibilitychange', () => { if (!document.hidden) sincronizar(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) sincronizar(false, true); });
 
 /* ---------- Navegación ---------- */
 function irA(v){
@@ -474,7 +470,7 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => irA(b.dat
 
 function renderTodo(){ renderHoy(); renderSemana(); renderAlimentos(); estadoNotif(); renderGoogle(); }
 renderTodo();
-sincronizar();
+sincronizar(false, true);
 revisarRecordatorios();
 setInterval(revisarRecordatorios, 30000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) revisarRecordatorios(); });
