@@ -3,19 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f4623a">
+<meta name="theme-color" content="#5b21b6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mis Comidas">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
 <link rel="stylesheet" href="styles.css">
 <title>Mis Comidas</title>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <linearGradient id="gradAnillo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9f43"/><stop offset="1" stop-color="#f4496b"/></linearGradient>
+  <linearGradient id="gradAnillo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#ec4899"/></linearGradient>
 </defs></svg>
 
 <nav aria-label="Menú principal">
@@ -50,23 +52,35 @@
           <div><h2 id="resumenTitulo">Tus comidas de hoy</h2><p class="hint" id="resumen"></p></div>
         </div>
         <div id="sigue"></div>
+        <div class="card agua">
+          <h2>💧 Agua de hoy</h2>
+          <p class="hint" id="aguaTxt"></p>
+          <div class="vasos" id="vasos"></div>
+        </div>
       </div>
       <div>
         <h2 class="seccion" style="margin-top:4px">Todo el día</h2>
         <div id="listaHoy"></div>
+        <div class="card">
+          <h2>📊 Tu semana</h2>
+          <p class="hint">Comidas que marcaste como listas en los últimos 7 días.</p>
+          <div class="barras" id="barras"></div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- SEMANA -->
   <section id="v-semana" class="view">
-    <p class="hint" style="margin:0 4px 12px">Elige un día y toca una comida para cambiar su hora o lo que vas a comer.</p>
+    <p class="hint" id="ayudaSemana" style="margin:0 4px 12px">Elige un día y toca una comida para cambiar su hora o lo que vas a comer.</p>
     <div class="dias" id="diasSemana"></div>
-    <div id="listaSemana" class="lista-doble"></div>
+    <div id="listaSemana"></div>
+    <div class="tablero" id="tablero"></div>
   </section>
 
   <!-- ALIMENTOS -->
   <section id="v-alimentos" class="view">
+   <div class="dos-col"><div>
     <div class="card">
       <h2>Mis alimentos</h2>
       <p class="hint">Escribe lo que sí puedes comer. Después lo eliges al armar cada comida.</p>
@@ -77,12 +91,15 @@
     </div>
     <h2 class="seccion">Lista de alimentos</h2>
     <div class="chips" id="listaAlimentos"></div>
-    <h2 class="seccion" id="sugTitulo">Ideas <span class="hint" style="font-weight:600">(toca para agregar)</span></h2>
+   </div><div>
+    <h2 class="seccion" id="sugTitulo">Mi lista de comidas permitidas <span class="hint" style="font-weight:600">(toca para agregar)</span></h2>
     <div class="chips" id="sugerencias"></div>
+   </div></div>
   </section>
 
   <!-- AJUSTES -->
   <section id="v-ajustes" class="view">
+   <div class="ajustes-grid"><div>
     <div class="card">
       <h2>🔔 Avisos</h2>
       <p class="hint" id="notifEstado"></p>
@@ -95,8 +112,20 @@
         <option value="15">15 minutos antes</option>
         <option value="30">30 minutos antes</option>
       </select>
+      <button class="btn sec ancho" id="probarAviso" style="margin-top:14px">🔔 Probar un aviso</button>
     </div>
-
+    <div class="card">
+      <h2>🎨 Personalizar</h2>
+      <label for="nombreUsuario" style="margin-top:8px">¿Cómo te llamas?</label>
+      <input id="nombreUsuario" placeholder="Tu nombre" autocomplete="off" maxlength="30">
+      <label for="tema">Colores</label>
+      <select id="tema">
+        <option value="auto">Automático (como tu aparato)</option>
+        <option value="claro">Claro</option>
+        <option value="oscuro">Oscuro</option>
+      </select>
+    </div>
+   </div><div>
     <div class="card">
       <h2>📆 Google Calendar</h2>
       <p class="hint">Guarda tus comidas en un calendario llamado "Mis Comidas" y las mantiene iguales en todos tus aparatos.</p>
@@ -114,27 +143,7 @@
         <input type="checkbox" id="alarmaCal" checked>
       </label>
     </div>
-
-    <div class="card">
-      <h2>📲 Instalar en el teléfono</h2>
-      <ol class="pasos hint">
-        <li><b>Android (Chrome):</b> menú ⋮ → "Instalar app".</li>
-        <li><b>iPhone (Safari):</b> botón Compartir → "Agregar a inicio".</li>
-      </ol>
-    </div>
-
-    <details class="card">
-      <summary>Más opciones</summary>
-      <div class="row" style="margin:10px 0 6px">
-        <button class="btn sec chico" id="exportar">Guardar respaldo</button>
-        <button class="btn sec chico" id="importar">Cargar respaldo</button>
-        <input type="file" id="archivo" accept="application/json" hidden>
-      </div>
-      <p class="hint">El respaldo es un archivo para pasar tu configuración de un aparato a otro.</p>
-      <div style="height:12px"></div>
-      <button class="btn sec chico" id="calendario">Descargar archivo de calendario (.ics)</button>
-      <p class="hint" style="margin-top:6px">Alternativa a Google: se abre con cualquier calendario y repite las comidas cada semana.</p>
-    </details>
+   </div></div>
   </section>
 </main>
 
@@ -162,6 +171,13 @@
       </div>
     </div>
   </form>
+</dialog>
+<dialog id="alerta">
+  <img src="ansioso.gif" alt="">
+  <div class="cuerpo">
+    <h2 id="alertaTitulo"></h2><p id="alertaTexto"></p>
+    <div class="row"><button class="btn ok" id="alertaListo">Ya comí ✓</button><button class="btn sec" id="alertaCerrar">Cerrar</button></div>
+  </div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
 
