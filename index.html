@@ -3,108 +3,91 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2e7d55">
+<meta name="theme-color" content="#f4623a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Comidas">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mis Comidas">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
 <title>Mis Comidas</title>
-<style>
-:root{
-  --bg:#f4f8f5; --card:#fff; --ink:#1d2b24; --muted:#66786f; --line:#dbe6df;
-  --green:#2e7d55; --green-d:#1f5c3d; --green-l:#e3f1e8; --amber:#b86e00; --amber-l:#fff3dc; --red:#b3261e;
-}
-@media (prefers-color-scheme:dark){
-  :root{--bg:#121a16; --card:#1b2621; --ink:#e8f1ec; --muted:#93a79c; --line:#2c3b34; --green:#4cae7c; --green-d:#7fd0a5; --green-l:#1f3a2c; --amber:#f0b14a; --amber-l:#3a2f17; --red:#f28b82;}
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:18px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  padding-bottom:calc(84px + env(safe-area-inset-bottom))}
-header{background:var(--green);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 16px}
-header h1{margin:0;font-size:1.25rem}
-header p{margin:2px 0 0;opacity:.9;font-size:.95rem;text-transform:capitalize}
-main{max-width:640px;margin:0 auto;padding:14px 14px 0}
-.view{display:none}.view.on{display:block}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);
-  padding-bottom:env(safe-area-inset-bottom);z-index:5}
-nav button{flex:1;border:0;background:none;color:var(--muted);padding:10px 4px 9px;font:inherit;font-size:.78rem;cursor:pointer}
-nav button b{display:block;font-size:1.4rem;font-weight:400}
-nav button.on{color:var(--green);font-weight:700}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:0 0 12px}
-.meal{display:flex;gap:14px;align-items:flex-start}
-.meal .time{font-weight:700;font-size:1.15rem;min-width:62px;color:var(--green-d)}
-.meal .body{flex:1;min-width:0}
-.meal h3{margin:0 0 4px;font-size:1.1rem}
-.meal ul{margin:0;padding-left:20px;color:var(--ink)}
-.meal .none{color:var(--muted);font-size:.9rem;margin:0}
-.meal.next{border:2px solid var(--green);background:var(--green-l)}
-.meal.done{opacity:.6}
-.meal.late{border-color:var(--amber);background:var(--amber-l)}
-.tag{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:99px;background:var(--green);color:#fff;margin-left:6px;vertical-align:middle}
-.tag.late{background:var(--amber)}
-.btn{border:0;border-radius:12px;padding:12px 16px;font:inherit;font-weight:600;cursor:pointer;background:var(--green);color:#fff}
-.btn.sec{background:var(--green-l);color:var(--green-d)}
-.btn.danger{background:transparent;color:var(--red)}
-.btn.small{padding:8px 12px;font-size:.9rem}
-.btn.block{width:100%}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.meal .acts{margin-top:10px}
-.progress{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0 14px}
-.progress i{display:block;height:100%;background:var(--green);transition:width .3s}
-h2{font-size:1.1rem;margin:18px 0 8px}
-.days{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px}
-.days button{flex:1;min-width:44px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:8px 0;font:inherit;font-size:.85rem;cursor:pointer}
-.days button.on{background:var(--green);color:#fff;border-color:var(--green)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px;border-radius:99px;font:inherit;font-size:.95rem;cursor:pointer}
-.chip.on{background:var(--green);color:#fff;border-color:var(--green)}
-.chip .x{margin-left:6px;opacity:.7}
-input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%}
-label{display:block;font-size:.85rem;color:var(--muted);margin:12px 0 4px}
-dialog{border:0;border-radius:20px;padding:18px;width:min(560px,94vw);background:var(--card);color:var(--ink);max-height:90vh}
-dialog::backdrop{background:rgba(0,0,0,.45)}
-.empty{text-align:center;color:var(--muted);padding:26px 10px}
-.hint{color:var(--muted);font-size:.9rem}
-.banner{background:var(--amber-l);border:1px solid var(--amber);border-radius:14px;padding:12px 14px;margin-bottom:12px;font-size:.95rem}
-.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
-.toast.on{opacity:1}
-</style>
 </head>
 <body>
-<header>
-  <h1>🍲 Mis Comidas</h1>
-  <p id="fecha"></p>
-</header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="gradAnillo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9f43"/><stop offset="1" stop-color="#f4496b"/></linearGradient>
+</defs></svg>
 
-<main>
+<nav aria-label="Menú principal">
+  <div class="logo"><img src="icon-192.png" alt=""><span>Mis Comidas</span></div>
+  <button data-v="hoy" class="on">
+    <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><span>Hoy</span></button>
+  <button data-v="semana">
+    <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Mi semana</span></button>
+  <button data-v="alimentos">
+    <svg viewBox="0 0 24 24"><path d="M4 12h16a8 8 0 0 1-16 0Z"/><path d="M9 8c-1-1.5 1-2.5 0-4M13 8c-1-1.5 1-2.5 0-4"/></svg><span>Alimentos</span></button>
+  <button data-v="ajustes">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg><span>Ajustes</span></button>
+</nav>
+
+<header class="top"><div>
+  <h1 id="saludo">¡Hola!</h1>
+  <p id="fecha"></p>
+</div></header>
+
+<main class="contenido flota">
+  <!-- HOY -->
   <section id="v-hoy" class="view on">
     <div id="avisoNotif"></div>
-    <div class="hint" id="resumen"></div>
-    <div class="progress"><i id="barra" style="width:0"></i></div>
-    <div id="listaHoy"></div>
+    <div id="bienvenida"></div>
+    <div class="grid-hoy">
+      <div class="lateral">
+        <div class="card resumen" id="resumenCard">
+          <div class="anillo">
+            <svg viewBox="0 0 100 100"><circle class="fondo" cx="50" cy="50" r="42"/><circle class="valor" id="anillo" cx="50" cy="50" r="42" stroke-dasharray="263.9" stroke-dashoffset="263.9"/></svg>
+            <b id="anilloTxt">0/0</b>
+          </div>
+          <div><h2 id="resumenTitulo">Tus comidas de hoy</h2><p class="hint" id="resumen"></p></div>
+        </div>
+        <div id="sigue"></div>
+      </div>
+      <div>
+        <h2 class="seccion" style="margin-top:4px">Todo el día</h2>
+        <div id="listaHoy"></div>
+      </div>
+    </div>
   </section>
 
+  <!-- SEMANA -->
   <section id="v-semana" class="view">
-    <div class="days" id="diasSemana"></div>
-    <div id="listaSemana"></div>
-    <button class="btn block" id="nuevaComida">+ Agregar comida</button>
+    <p class="hint" style="margin:0 4px 12px">Elige un día y toca una comida para cambiar su hora o lo que vas a comer.</p>
+    <div class="dias" id="diasSemana"></div>
+    <div id="listaSemana" class="lista-doble"></div>
   </section>
 
+  <!-- ALIMENTOS -->
   <section id="v-alimentos" class="view">
-    <p class="hint">Aquí van los alimentos permitidos en su dieta. Después los puedes elegir al armar cada comida.</p>
-    <form class="row" id="formAlimento" style="flex-wrap:nowrap">
-      <input id="nuevoAlimento" placeholder="Ej. Caldo de pollo" autocomplete="off">
-      <button class="btn" type="submit">Agregar</button>
-    </form>
-    <h2>Lista de alimentos</h2>
+    <div class="card">
+      <h2>Mis alimentos</h2>
+      <p class="hint">Escribe lo que sí puedes comer. Después lo eliges al armar cada comida.</p>
+      <form class="row" id="formAlimento" style="flex-wrap:nowrap;margin-top:12px">
+        <input id="nuevoAlimento" placeholder="Ej. Caldo de pollo" autocomplete="off" enterkeyhint="done">
+        <button class="btn" type="submit">Agregar</button>
+      </form>
+    </div>
+    <h2 class="seccion">Lista de alimentos</h2>
     <div class="chips" id="listaAlimentos"></div>
+    <h2 class="seccion" id="sugTitulo">Ideas <span class="hint" style="font-weight:600">(toca para agregar)</span></h2>
+    <div class="chips" id="sugerencias"></div>
   </section>
 
+  <!-- AJUSTES -->
   <section id="v-ajustes" class="view">
     <div class="card">
-      <label for="aviso" style="margin-top:0">Avisar con anticipación</label>
+      <h2>🔔 Avisos</h2>
+      <p class="hint" id="notifEstado"></p>
+      <button class="btn ancho" id="btnNotif" style="margin:10px 0 4px">Activar notificaciones</button>
+      <label for="aviso">¿Cuánto antes quieres que te avise?</label>
       <select id="aviso">
         <option value="0">A la hora exacta</option>
         <option value="5">5 minutos antes</option>
@@ -112,64 +95,67 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
         <option value="15">15 minutos antes</option>
         <option value="30">30 minutos antes</option>
       </select>
-      <div style="height:12px"></div>
-      <button class="btn sec block" id="btnNotif">Activar notificaciones</button>
-      <p class="hint" id="notifEstado"></p>
     </div>
+
     <div class="card">
-      <b>Google Calendar</b>
-      <p class="hint" style="margin:4px 0 10px">Guarda las comidas en un calendario "Mis Comidas" de su cuenta de Google y las mantiene al día en todos sus dispositivos.</p>
-      <div id="gConfig"><label for="gClientId" style="margin-top:0">ID de cliente de Google</label>
+      <h2>📆 Google Calendar</h2>
+      <p class="hint">Guarda tus comidas en un calendario llamado "Mis Comidas" y las mantiene iguales en todos tus aparatos.</p>
+      <div id="gConfig"><label for="gClientId">ID de cliente de Google</label>
         <input id="gClientId" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off"><div style="height:10px"></div></div>
-      <div class="row">
+      <div class="row" style="margin-top:12px">
         <button class="btn" id="gConectar">Conectar con Google</button>
         <button class="btn" id="gSync" hidden>Sincronizar ahora</button>
-        <button class="btn danger small" id="gSalir" hidden>Desconectar</button>
+        <button class="btn peligro chico" id="gSalir" hidden>Desconectar</button>
       </div>
-      <p class="hint" id="gEstado"></p>
+      <p class="hint" id="gEstado" style="margin-top:8px"></p>
+      <label class="interruptor" for="alarmaCal" style="font-weight:700">
+        <span>Que también suene la alarma de Google Calendar
+          <span class="hint" style="display:block;font-weight:400">Suena aunque la app esté cerrada. Esa notificación muestra el correo de la cuenta; si no te gusta, apágala.</span></span>
+        <input type="checkbox" id="alarmaCal" checked>
+      </label>
     </div>
+
     <div class="card">
-      <button class="btn block" id="calendario">📆 Agregar al Calendario de Google</button>
-      <p class="hint">Descarga un archivo que se abre con Google Calendar (o el calendario del teléfono) y crea las comidas repetidas cada semana, con alarma que suena aunque la app esté cerrada. Si cambias los horarios, vuelve a descargarlo (borra antes el calendario anterior).</p>
+      <h2>📲 Instalar en el teléfono</h2>
+      <ol class="pasos hint">
+        <li><b>Android (Chrome):</b> menú ⋮ → "Instalar app".</li>
+        <li><b>iPhone (Safari):</b> botón Compartir → "Agregar a inicio".</li>
+      </ol>
     </div>
-    <div class="card">
-      <div class="row">
-        <button class="btn sec small" id="exportar">Guardar respaldo</button>
-        <button class="btn sec small" id="importar">Cargar respaldo</button>
+
+    <details class="card">
+      <summary>Más opciones</summary>
+      <div class="row" style="margin:10px 0 6px">
+        <button class="btn sec chico" id="exportar">Guardar respaldo</button>
+        <button class="btn sec chico" id="importar">Cargar respaldo</button>
         <input type="file" id="archivo" accept="application/json" hidden>
       </div>
-      <p class="hint">El respaldo es un archivo que sirve para pasar la configuración de la computadora al teléfono.</p>
-    </div>
-    <div class="card">
-      <b>Instalar en el teléfono</b>
-      <p class="hint" style="margin:6px 0 0">Android (Chrome): menú ⋮ → "Instalar app" o "Agregar a pantalla principal".<br>iPhone (Safari): botón Compartir → "Agregar a inicio".</p>
-    </div>
+      <p class="hint">El respaldo es un archivo para pasar tu configuración de un aparato a otro.</p>
+      <div style="height:12px"></div>
+      <button class="btn sec chico" id="calendario">Descargar archivo de calendario (.ics)</button>
+      <p class="hint" style="margin-top:6px">Alternativa a Google: se abre con cualquier calendario y repite las comidas cada semana.</p>
+    </details>
   </section>
 </main>
 
-<nav>
-  <button data-v="hoy" class="on"><b>📅</b>Hoy</button>
-  <button data-v="semana"><b>🗓️</b>Semana</button>
-  <button data-v="alimentos"><b>🥣</b>Alimentos</button>
-  <button data-v="ajustes"><b>⚙️</b>Ajustes</button>
-</nav>
+<button class="btn fab" id="nuevaComida" hidden><span style="font-size:1.3rem;line-height:1">＋</span> Agregar comida</button>
 
 <dialog id="dlg">
   <form method="dialog" id="formComida">
-    <h2 style="margin-top:0" id="dlgTitulo">Comida</h2>
-    <label for="cNombre">Nombre</label>
-    <input id="cNombre" required placeholder="Ej. Desayuno">
-    <label for="cHH">Hora</label>
+    <h2 id="dlgTitulo">Comida</h2>
+    <label for="cNombre">¿Cómo se llama?</label>
+    <input id="cNombre" required placeholder="Ej. Desayuno" autocomplete="off">
+    <label for="cHH">¿A qué hora?</label>
     <div class="row" style="flex-wrap:nowrap"><select id="cHH"></select><select id="cMM"></select></div>
-    <label>Días</label>
-    <div class="days" id="cDias"></div>
-    <label>Alimentos</label>
+    <label>¿Qué días?</label>
+    <div class="dias" id="cDias"></div>
+    <label>¿Qué vas a comer?</label>
     <div class="chips" id="cAlimentos"></div>
     <p class="hint" id="cSinAlimentos" hidden>Primero agrega alimentos en la pestaña "Alimentos".</p>
     <label for="cNota">Nota (opcional)</label>
-    <input id="cNota" placeholder="Ej. Sin sal, tibio…">
-    <div class="row" style="margin-top:18px;justify-content:space-between">
-      <button type="button" class="btn danger" id="cBorrar">Eliminar</button>
+    <input id="cNota" placeholder="Ej. Sin sal, tibio…" autocomplete="off">
+    <div class="row fin">
+      <button type="button" class="btn peligro" id="cBorrar">Eliminar</button>
       <div class="row">
         <button type="button" class="btn sec" id="cCancelar">Cancelar</button>
         <button type="submit" class="btn">Guardar</button>
@@ -177,404 +163,9 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
     </div>
   </form>
 </dialog>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status"></div>
 
 <script src="config.js"></script>
-<script>
-const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-const KEY = 'comidas-v1';
-const $ = s => document.querySelector(s);
-const uid = () => Math.random().toString(36).slice(2, 9);
-
-const defaults = () => ({
-  comidas: [
-    {id:uid(), nombre:'Desayuno',  hora:'08:00', dias:[0,1,2,3,4,5,6], alimentos:[], nota:''},
-    {id:uid(), nombre:'Colación',  hora:'11:00', dias:[0,1,2,3,4,5,6], alimentos:[], nota:''},
-    {id:uid(), nombre:'Comida',    hora:'14:00', dias:[0,1,2,3,4,5,6], alimentos:[], nota:''},
-    {id:uid(), nombre:'Colación',  hora:'17:00', dias:[0,1,2,3,4,5,6], alimentos:[], nota:''},
-    {id:uid(), nombre:'Cena',      hora:'20:00', dias:[0,1,2,3,4,5,6], alimentos:[], nota:''},
-  ],
-  catalogo: [],
-  hechos: {},      // {'2026-10-24': {idComida:true}}
-  avisados: {},    // {'2026-10-24|idComida': true}
-  anticipacion: 10
-});
-
-let S;
-try { S = JSON.parse(localStorage.getItem(KEY)) || defaults(); } catch { S = defaults(); }
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
-
-const pad = n => String(n).padStart(2,'0');
-const hoyStr = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-const minutos = h => { const [a,b] = h.split(':').map(Number); return a*60+b; };
-const ahoraMin = () => { const d = new Date(); return d.getHours()*60 + d.getMinutes(); };
-const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fmt12 = h => { const [a,b] = h.split(':').map(Number); return `${a%12||12}:${pad(b)} ${a<12?'a.m.':'p.m.'}`; };
-
-function toast(t){ const e = $('#toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2000); }
-
-/* ---------- Hoy ---------- */
-function comidasDelDia(dia){ return S.comidas.filter(c => c.dias.includes(dia)).sort((a,b) => minutos(a.hora)-minutos(b.hora)); }
-
-function cuerpoComida(c){
-  const al = c.alimentos.length ? `<ul>${c.alimentos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : `<p class="none">Sin alimentos asignados</p>`;
-  return `<h3>${esc(c.nombre)}</h3>${al}${c.nota ? `<p class="hint" style="margin:6px 0 0">📝 ${esc(c.nota)}</p>` : ''}`;
-}
-
-function renderHoy(){
-  const d = new Date();
-  $('#fecha').textContent = d.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'});
-  const lista = comidasDelDia(d.getDay());
-  const hechos = S.hechos[hoyStr()] || {};
-  const nHechos = lista.filter(c => hechos[c.id]).length;
-  $('#resumen').textContent = lista.length ? `${nHechos} de ${lista.length} comidas de hoy` : '';
-  $('#barra').style.width = lista.length ? (nHechos/lista.length*100)+'%' : '0';
-  const ahora = ahoraMin();
-  const sig = lista.find(c => !hechos[c.id] && minutos(c.hora) >= ahora - 30);
-  if (!lista.length){ $('#listaHoy').innerHTML = `<div class="empty">No hay comidas programadas hoy.<br>Agrégalas en la pestaña Semana.</div>`; return; }
-  $('#listaHoy').innerHTML = lista.map(c => {
-    const hecho = !!hechos[c.id];
-    const tarde = !hecho && minutos(c.hora) < ahora - 30;
-    const cls = hecho ? 'done' : (sig && sig.id === c.id ? 'next' : (tarde ? 'late' : ''));
-    const tag = hecho ? '<span class="tag">Listo ✓</span>' : (cls === 'next' ? '<span class="tag">Sigue</span>' : (tarde ? '<span class="tag late">Pendiente</span>' : ''));
-    return `<div class="card meal ${cls}">
-      <div class="time">${fmt12(c.hora)}</div>
-      <div class="body">${cuerpoComida(c).replace('</h3>', tag + '</h3>')}
-        <div class="acts"><button class="btn small ${hecho?'sec':''}" data-hecho="${c.id}">${hecho ? 'Deshacer' : 'Ya comí ✓'}</button></div>
-      </div></div>`;
-  }).join('');
-}
-
-$('#listaHoy').addEventListener('click', e => {
-  const id = e.target.dataset.hecho; if (!id) return;
-  const k = hoyStr(); S.hechos[k] = S.hechos[k] || {};
-  if (S.hechos[k][id]) delete S.hechos[k][id]; else S.hechos[k][id] = true;
-  save(); renderHoy();
-});
-
-/* ---------- Semana ---------- */
-let diaSel = new Date().getDay();
-function renderSemana(){
-  $('#diasSemana').innerHTML = DIAS.map((n,i) => `<button data-d="${i}" class="${i===diaSel?'on':''}">${n}</button>`).join('');
-  const lista = comidasDelDia(diaSel);
-  $('#listaSemana').innerHTML = lista.length ? lista.map(c => `
-    <div class="card meal"><div class="time">${fmt12(c.hora)}</div>
-    <div class="body">${cuerpoComida(c)}<div class="acts"><button class="btn sec small" data-edit="${c.id}">Editar</button></div></div></div>`).join('')
-    : `<div class="empty">Sin comidas este día.</div>`;
-}
-$('#diasSemana').addEventListener('click', e => { if (e.target.dataset.d) { diaSel = +e.target.dataset.d; renderSemana(); } });
-$('#listaSemana').addEventListener('click', e => { if (e.target.dataset.edit) abrirComida(e.target.dataset.edit); });
-$('#nuevaComida').onclick = () => abrirComida(null);
-
-/* ---------- Editor de comida ---------- */
-$('#cHH').innerHTML = Array.from({length:24}, (_,h) => `<option value="${h}">${h%12||12} ${h<12?'a.m.':'p.m.'}</option>`).join('');
-$('#cMM').innerHTML = Array.from({length:60}, (_,m) => `<option value="${pad(m)}">${pad(m)}</option>`).join('');
-let editando = null, selDias = [], selAl = [];
-function abrirComida(id){
-  editando = id;
-  const c = id ? S.comidas.find(x => x.id === id) : null;
-  $('#dlgTitulo').textContent = c ? 'Editar comida' : 'Nueva comida';
-  $('#cNombre').value = c ? c.nombre : '';
-  const [hh, mm] = (c ? c.hora : '12:00').split(':');
-  $('#cHH').value = String(+hh); $('#cMM').value = mm;
-  $('#cNota').value = c ? c.nota : '';
-  selDias = c ? [...c.dias] : [diaSel];
-  selAl = c ? [...c.alimentos] : [];
-  $('#cBorrar').style.visibility = c ? 'visible' : 'hidden';
-  pintarEditor();
-  $('#dlg').showModal();
-}
-function pintarEditor(){
-  $('#cDias').innerHTML = DIAS.map((n,i) => `<button type="button" data-d="${i}" class="${selDias.includes(i)?'on':''}">${n}</button>`).join('');
-  const todos = [...new Set([...S.catalogo, ...selAl])];
-  $('#cAlimentos').innerHTML = todos.map(a => `<button type="button" class="chip ${selAl.includes(a)?'on':''}" data-a="${esc(a)}">${esc(a)}</button>`).join('');
-  $('#cSinAlimentos').hidden = todos.length > 0;
-}
-$('#cDias').addEventListener('click', e => { if (e.target.dataset.d === undefined) return; const d = +e.target.dataset.d;
-  selDias = selDias.includes(d) ? selDias.filter(x => x !== d) : [...selDias, d]; pintarEditor(); });
-$('#cAlimentos').addEventListener('click', e => { const a = e.target.dataset.a; if (!a) return;
-  selAl = selAl.includes(a) ? selAl.filter(x => x !== a) : [...selAl, a]; pintarEditor(); });
-$('#cCancelar').onclick = () => $('#dlg').close();
-$('#cBorrar').onclick = () => {
-  if (!confirm('¿Eliminar esta comida?')) return;
-  S.comidas = S.comidas.filter(c => c.id !== editando); save(); cambio(); $('#dlg').close(); renderTodo();
-};
-$('#formComida').addEventListener('submit', e => {
-  if (!selDias.length){ e.preventDefault(); toast('Elige al menos un día'); return; }
-  const datos = {nombre:$('#cNombre').value.trim(), hora:`${pad(+$('#cHH').value)}:${$('#cMM').value}`, dias:[...selDias].sort(), alimentos:selAl, nota:$('#cNota').value.trim()};
-  if (editando) Object.assign(S.comidas.find(c => c.id === editando), datos);
-  else S.comidas.push({id:uid(), ...datos});
-  save(); cambio(); renderTodo();
-});
-
-/* ---------- Alimentos ---------- */
-function renderAlimentos(){
-  $('#listaAlimentos').innerHTML = S.catalogo.length
-    ? S.catalogo.map(a => `<span class="chip">${esc(a)}<span class="x" data-del="${esc(a)}">✕</span></span>`).join('')
-    : `<div class="empty" style="width:100%">Aún no hay alimentos.</div>`;
-}
-$('#formAlimento').addEventListener('submit', e => {
-  e.preventDefault();
-  const v = $('#nuevoAlimento').value.trim(); if (!v) return;
-  if (!S.catalogo.some(a => a.toLowerCase() === v.toLowerCase())) S.catalogo.push(v);
-  $('#nuevoAlimento').value = ''; save(); cambio(); renderAlimentos();
-});
-$('#listaAlimentos').addEventListener('click', e => {
-  const a = e.target.dataset.del; if (!a) return;
-  S.catalogo = S.catalogo.filter(x => x !== a);
-  S.comidas.forEach(c => c.alimentos = c.alimentos.filter(x => x !== a));
-  save(); cambio(); renderAlimentos();
-});
-
-/* ---------- Notificaciones ---------- */
-const hayNotif = 'Notification' in window;
-function estadoNotif(){
-  const el = $('#notifEstado'), av = $('#avisoNotif');
-  av.innerHTML = '';
-  if (!hayNotif){ el.textContent = 'Este navegador no permite notificaciones.'; return; }
-  const p = Notification.permission;
-  el.textContent = p === 'granted' ? 'Activadas. Para que lleguen, la app debe estar abierta o en segundo plano.'
-    : p === 'denied' ? 'Bloqueadas. Actívalas en los permisos del navegador.' : 'Aún no activadas.';
-  $('#btnNotif').hidden = p === 'granted';
-  if (p === 'default') av.innerHTML = `<div class="banner">🔔 Activa las notificaciones en Ajustes para que te avise cuando sea hora de comer.</div>`;
-}
-$('#btnNotif').onclick = async () => { if (hayNotif) { await Notification.requestPermission(); estadoNotif(); } };
-
-async function notificar(titulo, cuerpo){
-  if (hayNotif && Notification.permission === 'granted'){
-    try {
-      const reg = await navigator.serviceWorker.getRegistration();
-      if (reg) { await reg.showNotification(titulo, {body:cuerpo, icon:'icon-192.png', badge:'icon-192.png', vibrate:[200,100,200], tag:titulo+cuerpo}); return; }
-      new Notification(titulo, {body:cuerpo, icon:'icon-192.png'});
-    } catch {}
-  }
-  toast(titulo + ' – ' + cuerpo);
-}
-
-function revisarRecordatorios(){
-  const d = new Date(), k = hoyStr(), ahora = ahoraMin();
-  const hechos = S.hechos[k] || {};
-  comidasDelDia(d.getDay()).forEach(c => {
-    if (hechos[c.id]) return;
-    const objetivo = minutos(c.hora) - S.anticipacion;
-    const clave = k + '|' + c.id;
-    if (ahora >= objetivo && ahora <= minutos(c.hora) + 15 && !S.avisados[clave]){
-      S.avisados[clave] = true;
-      // limpiar avisos de días anteriores
-      Object.keys(S.avisados).forEach(x => { if (!x.startsWith(k)) delete S.avisados[x]; });
-      save();
-      const al = c.alimentos.length ? c.alimentos.join(', ') : 'Es hora de tu comida';
-      notificar(`${c.nombre} – ${fmt12(c.hora)}`, al);
-    }
-  });
-  renderHoy();
-}
-
-/* ---------- Ajustes / respaldo ---------- */
-$('#aviso').value = S.anticipacion;
-$('#aviso').onchange = e => { S.anticipacion = +e.target.value; save(); cambio(); toast('Guardado'); };
-$('#exportar').onclick = () => {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], {type:'application/json'}));
-  a.download = 'respaldo-comidas.json'; a.click();
-};
-$('#calendario').onclick = () => {
-  const ICS = ['SU','MO','TU','WE','TH','FR','SA'];
-  const t = s => String(s).replace(/\\/g,'\\\\').replace(/[,;]/g, m => '\\' + m).replace(/\n/g,'\\n');
-  const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
-  const out = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Mis Comidas//ES','CALSCALE:GREGORIAN','X-WR-CALNAME:Mis Comidas'];
-  S.comidas.forEach(c => {
-    if (!c.dias.length) return;
-    const ini = new Date();   // primer día que coincida con los días de la comida
-    while (!c.dias.includes(ini.getDay())) ini.setDate(ini.getDate() + 1);
-    const [h, m] = c.hora.split(':').map(Number);
-    const fin = h*60 + m + 30;
-    const f = (hh, mm) => `${hoyStr(ini).replace(/-/g,'')}T${pad(hh)}${pad(mm)}00`;
-    const desc = [c.alimentos.join(', '), c.nota].filter(Boolean).join(' — ');
-    out.push('BEGIN:VEVENT', `UID:${c.id}@mis-comidas`, `DTSTAMP:${stamp}`,
-      `DTSTART:${f(h, m)}`, `DTEND:${f(Math.min(23, Math.floor(fin/60)), fin >= 1440 ? 59 : fin % 60)}`,
-      `RRULE:FREQ=WEEKLY;BYDAY=${c.dias.map(d => ICS[d]).join(',')}`,
-      `SUMMARY:${t('🍲 ' + c.nombre)}`, desc ? `DESCRIPTION:${t(desc)}` : '',
-      'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${t(c.nombre)}`,
-      `TRIGGER:${S.anticipacion ? '-PT' + S.anticipacion + 'M' : 'PT0S'}`, 'END:VALARM', 'END:VEVENT');
-  });
-  out.push('END:VCALENDAR');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([out.filter(Boolean).join('\r\n')], {type:'text/calendar'}));
-  a.download = 'mis-comidas.ics'; a.click();
-};
-$('#importar').onclick = () => $('#archivo').click();
-$('#archivo').onchange = async e => {
-  const f = e.target.files[0]; if (!f) return;
-  try {
-    const d = JSON.parse(await f.text());
-    if (!Array.isArray(d.comidas) || !Array.isArray(d.catalogo)) throw 0;
-    if (!confirm('Esto reemplaza la configuración actual. ¿Continuar?')) return;
-    S = {...defaults(), ...d}; save(); cambio(); $('#aviso').value = S.anticipacion; renderTodo(); toast('Respaldo cargado');
-  } catch { toast('Archivo no válido'); }
-  e.target.value = '';
-};
-
-/* ---------- Google Calendar (base de datos) ---------- */
-const GKEY = 'comidas-google';
-let G; try { G = JSON.parse(localStorage.getItem(GKEY)) || {}; } catch { G = {}; }
-G = {clientId:'', calId:'', on:false, dirty:false, sincronizado:false, ...G};
-const saveG = () => { try { localStorage.setItem(GKEY, JSON.stringify(G)); } catch {} };
-const clientId = () => (window.CONFIG && window.CONFIG.googleClientId) || G.clientId;
-const SCOPES = 'https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.calendarlist.readonly';
-const ICS_DIAS = ['SU','MO','TU','WE','TH','FR','SA'];
-const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-let token = null, tokenExp = 0, ocupado = false, tmrSync;
-
-function cargarGIS(){
-  if (window.google && google.accounts) return Promise.resolve();
-  return new Promise((ok, mal) => {
-    const s = document.createElement('script');
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.onload = ok; s.onerror = () => mal(new Error('Sin conexión con Google'));
-    document.head.appendChild(s);
-  });
-}
-async function pedirToken(prompt){
-  if (!clientId()) throw new Error('Falta el ID de cliente de Google');
-  await cargarGIS();
-  return new Promise((ok, mal) => {
-    google.accounts.oauth2.initTokenClient({
-      client_id: clientId(), scope: SCOPES,
-      callback: r => { if (r.error) return mal(new Error(r.error)); token = r.access_token; tokenExp = Date.now() + r.expires_in*1000; ok(); },
-      error_callback: e => mal(new Error(e.type || 'cancelado'))
-    }).requestAccessToken({prompt});
-  });
-}
-const tokenVigente = () => token && Date.now() < tokenExp - 60000;
-async function api(path, opt = {}, reintento = true){
-  if (!tokenVigente()) await pedirToken('');
-  const r = await fetch('https://www.googleapis.com/calendar/v3' + path, {
-    method: opt.method || 'GET',
-    headers: {Authorization: 'Bearer ' + token, 'Content-Type': 'application/json'},
-    body: opt.body ? JSON.stringify(opt.body) : undefined
-  });
-  if (r.status === 401 && reintento){ token = null; return api(path, opt, false); }
-  if (r.status === 204) return null;
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error((j.error && j.error.message) || ('Error ' + r.status));
-  return j;
-}
-
-async function asegurarCal(){
-  if (G.calId) return encodeURIComponent(G.calId);
-  const l = await api('/users/me/calendarList?minAccessRole=owner');
-  let c = (l.items || []).find(x => x.summary === 'Mis Comidas');
-  if (!c) c = await api('/calendars', {method:'POST', body:{summary:'Mis Comidas', timeZone:TZ}});
-  G.calId = c.id; saveG();
-  return encodeURIComponent(c.id);
-}
-
-function eventoDe(c){
-  const ini = new Date();
-  while (!c.dias.includes(ini.getDay())) ini.setDate(ini.getDate() + 1);
-  const f = hoyStr(ini), fin = Math.min(minutos(c.hora) + 30, 1439);
-  return {
-    summary: '🍲 ' + c.nombre,
-    description: [c.alimentos.join(', '), c.nota].filter(Boolean).join(' — '),
-    start: {dateTime: `${f}T${c.hora}:00`, timeZone: TZ},
-    end: {dateTime: `${f}T${pad(Math.floor(fin/60))}:${pad(fin%60)}:00`, timeZone: TZ},
-    recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=' + c.dias.map(d => ICS_DIAS[d]).join(',')],
-    reminders: {useDefault: false, overrides: [{method:'popup', minutes: S.anticipacion}]},
-    extendedProperties: {private: {app:'mis-comidas', mid:c.id, nombre:c.nombre, alimentos:JSON.stringify(c.alimentos), nota:c.nota}}
-  };
-}
-const listarEventos = cal => api(`/calendars/${cal}/events?privateExtendedProperty=app%3Dmis-comidas&maxResults=250`)
-  .then(r => (r.items || []).filter(e => e.recurrence && e.extendedProperties && e.extendedProperties.private && e.extendedProperties.private.mid));
-
-async function subir(){
-  const cal = await asegurarCal();
-  const porMid = new Map((await listarEventos(cal)).map(e => [e.extendedProperties.private.mid, e]));
-  for (const c of S.comidas){
-    const ex = porMid.get(c.id);
-    if (ex) await api(`/calendars/${cal}/events/${ex.id}`, {method:'PUT', body:eventoDe(c)});
-    else await api(`/calendars/${cal}/events`, {method:'POST', body:eventoDe(c)});
-    porMid.delete(c.id);
-  }
-  for (const e of porMid.values()) await api(`/calendars/${cal}/events/${e.id}`, {method:'DELETE'});
-  await api(`/calendars/${cal}`, {method:'PATCH', body:{description: JSON.stringify({catalogo:S.catalogo, anticipacion:S.anticipacion})}});
-  G.dirty = false; G.sincronizado = true; saveG();
-}
-
-async function bajar(){
-  const cal = await asegurarCal();
-  const [info, evs] = await Promise.all([api(`/calendars/${cal}`), listarEventos(cal)]);
-  if (!evs.length && !G.sincronizado) return subir();   // primera vez con calendario vacío: sube lo local
-  S.comidas = evs.map(e => {
-    const p = e.extendedProperties.private;
-    const by = ((e.recurrence.find(x => x.startsWith('RRULE')) || '').match(/BYDAY=([A-Z,]+)/) || [])[1];
-    const dias = by ? by.split(',').map(x => ICS_DIAS.indexOf(x)).filter(i => i >= 0) : [0,1,2,3,4,5,6];
-    let alimentos = []; try { alimentos = JSON.parse(p.alimentos || '[]'); } catch {}
-    return {id:p.mid, nombre:p.nombre || e.summary.replace('🍲 ',''), hora:e.start.dateTime.slice(11,16), dias, alimentos, nota:p.nota || ''};
-  });
-  try {
-    const d = JSON.parse(info.description || '{}');
-    if (Array.isArray(d.catalogo)) S.catalogo = d.catalogo;
-    if (d.anticipacion != null) S.anticipacion = d.anticipacion;
-  } catch {}
-  $('#aviso').value = S.anticipacion;
-  save(); G.sincronizado = true; saveG();
-}
-
-function estadoG(t){ $('#gEstado').textContent = t; }
-async function sincronizar(manual){
-  if (!G.on || ocupado) return;
-  ocupado = true; estadoG('Sincronizando…');
-  try {
-    if (manual && !tokenVigente()) await pedirToken('');
-    if (G.dirty) await subir(); else await bajar();
-    estadoG('Sincronizado a las ' + fmt12(`${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`));
-    if (manual) toast('Sincronizado');
-  } catch (err) {
-    estadoG('No se pudo sincronizar (' + err.message + '). Toca "Sincronizar ahora".');
-  } finally { ocupado = false; renderTodo(); }
-}
-function cambio(){            // llamar tras editar comidas, alimentos o ajustes
-  if (!G.on) return;
-  G.dirty = true; saveG();
-  clearTimeout(tmrSync); tmrSync = setTimeout(() => sincronizar(), 1500);
-}
-function renderGoogle(){
-  const fijo = !!(window.CONFIG && window.CONFIG.googleClientId);
-  $('#gConfig').hidden = fijo || G.on;
-  $('#gClientId').value = G.clientId;
-  $('#gConectar').hidden = G.on; $('#gSync').hidden = !G.on; $('#gSalir').hidden = !G.on;
-}
-$('#gConectar').onclick = async () => {
-  if (!(window.CONFIG && window.CONFIG.googleClientId)) G.clientId = $('#gClientId').value.trim();
-  if (!clientId()) { toast('Pega primero el ID de cliente'); return; }
-  try { await pedirToken('select_account'); } catch (err) { estadoG('No se pudo conectar (' + err.message + ')'); return; }
-  G.on = true; G.sincronizado = false; saveG(); renderGoogle();
-  sincronizar(true);
-};
-$('#gSync').onclick = () => sincronizar(true);
-$('#gSalir').onclick = () => {
-  if (!confirm('¿Desconectar de Google? Las comidas se quedan en este teléfono y en el calendario.')) return;
-  if (token && window.google) google.accounts.oauth2.revoke(token);
-  token = null; G = {...G, on:false, calId:'', dirty:false, sincronizado:false}; saveG();
-  estadoG(''); renderGoogle();
-};
-document.addEventListener('visibilitychange', () => { if (!document.hidden) sincronizar(); });
-
-/* ---------- Navegación ---------- */
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
-  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
-  window.scrollTo(0, 0);
-});
-
-function renderTodo(){ renderHoy(); renderSemana(); renderAlimentos(); estadoNotif(); renderGoogle(); }
-renderTodo();
-sincronizar();
-revisarRecordatorios();
-setInterval(revisarRecordatorios, 30000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) revisarRecordatorios(); });
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-</script>
+<script src="app.js"></script>
 </body>
 </html>
