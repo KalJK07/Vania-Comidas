@@ -501,6 +501,8 @@ $('#gSalir').onclick = () => {
   estadoG(''); renderGoogle();
 };
 document.addEventListener('visibilitychange', () => { if (!document.hidden) sincronizar(false, true); });
+// El navegador solo deja abrir la ventana de Google tras un toque: aprovechamos el primero para renovar el token sin que ella tenga que hacer nada.
+document.addEventListener('pointerdown', () => { if (G.on && !ocupado && !tokenVigente()) sincronizar(false, false); }, true);
 
 /* ---------- Navegación ---------- */
 function irA(v){
