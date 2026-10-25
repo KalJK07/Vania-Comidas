@@ -501,9 +501,15 @@ $('#gSalir').onclick = () => {
   estadoG(''); renderGoogle();
 };
 document.addEventListener('visibilitychange', () => { if (!document.hidden) sincronizar(false, true); });
-// El navegador solo deja abrir la ventana de Google tras un toque: aprovechamos el primero para renovar el token sin que ella tenga que hacer nada.
-document.addEventListener('pointerdown', () => { if (G.on && !ocupado && !tokenVigente()) sincronizar(false, false); }, true);
-
+// Google solo deja renovar el acceso tras un toque del usuario: este aviso amable pide ese toque ("Vale") y aprovecha para sincronizar.
+let ultimoRecuerdo = 0;
+function recordarSync(){
+  if (!G.on || ocupado || tokenVigente() || Date.now() - ultimoRecuerdo < 30*60000) return;
+  if (document.querySelector('dialog[open]')) return;
+  ultimoRecuerdo = Date.now();
+  $('#recuerda').showModal();
+}
+$('#recuerdaOk').onclick = () => { $('#recuerda').close(); sincronizar(true); };
 /* ---------- Navegación ---------- */
 function irA(v){
   document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x.dataset.v === v));
@@ -516,7 +522,8 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => irA(b.dat
 function renderTodo(){ renderHoy(); renderSemana(); renderAlimentos(); estadoNotif(); renderGoogle(); }
 renderTodo();
 sincronizar(false, true);
+recordarSync();
 revisarRecordatorios();
 setInterval(revisarRecordatorios, 30000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) revisarRecordatorios(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ revisarRecordatorios(); recordarSync(); } });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});

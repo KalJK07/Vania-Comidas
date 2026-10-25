@@ -194,6 +194,10 @@ dialog .row.fin{margin-top:20px;justify-content:space-between}
 #alerta h2{font-size:1.5rem;line-height:1.2}
 #alerta p{margin:6px 0 16px;color:var(--muted)}
 #alerta .row{justify-content:center}
+#recuerda{text-align:center;width:min(360px,92vw)}
+#recuerda img{width:140px;height:auto;margin:0 auto 6px;display:block}
+#recuerda p{margin:6px 0 18px;color:var(--muted)}
+#recuerda .row{justify-content:center}
 
 /* varios */
 .vacio{text-align:center;color:var(--muted);padding:30px 12px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
@@ -239,7 +243,7 @@ dialog .row.fin{margin-top:20px;justify-content:space-between}
   .toast{bottom:36px}
 }
 @media (max-width:600px){
-  dialog:not(#alerta){margin:auto 0 0;width:100%;max-width:none;border-radius:28px 28px 0 0;max-height:94vh}
+  dialog:not(#alerta):not(#recuerda){margin:auto 0 0;width:100%;max-width:none;border-radius:28px 28px 0 0;max-height:94vh}
   .comida{padding:12px 12px}
   .comida .ico{width:46px;height:46px;font-size:1.5rem}
 }
