@@ -15,7 +15,8 @@ const defaults = () => ({
   alarmaCal: true, // alarma propia de Google Calendar en los eventos
   visto: false,    // ya vio la bienvenida
   nombre: '',
-  tema: 'auto'
+  tema: 'auto',
+  letra: 'normal'
 });
 
 let S;
@@ -30,22 +31,58 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 const fmt12 = h => { const [a,b] = h.split(':').map(Number); return `${a%12||12}:${pad(b)} ${a<12?'a.m.':'p.m.'}`; };
 
 const aplicarTema = () => { if (S.tema === 'claro' || S.tema === 'oscuro') document.documentElement.dataset.theme = S.tema; else delete document.documentElement.dataset.theme; };
-aplicarTema();
+const aplicarLetra = () => { if (S.letra === 'grande' || S.letra === 'enorme') document.documentElement.dataset.letra = S.letra; else delete document.documentElement.dataset.letra; };
+aplicarLetra();
+
+/* ---------- Confeti ---------- */
+const lienzo = document.createElement('canvas'); lienzo.id = 'confeti'; document.body.appendChild(lienzo);
+const pincel = lienzo.getContext && lienzo.getContext('2d');
+let piezas = [], animando = false;
+const ajustarLienzo = () => { lienzo.width = innerWidth; lienzo.height = innerHeight; };
+addEventListener('resize', ajustarLienzo); ajustarLienzo();
+const COLORES = ['#7c3aed','#a855f7','#c026d3','#ec4899','#f9a8d4','#ffffff','#fde047'];
+function confeti(x, y, n = 60, fuerza = 1){
+  if (!pincel || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (let i = 0; i < n; i++) piezas.push({x, y, vx:(Math.random()-.5)*11*fuerza, vy:(Math.random()-.95)*12*fuerza,
+    w:6+Math.random()*7, h:4+Math.random()*5, r:Math.random()*6, vr:(Math.random()-.5)*.4, c:COLORES[i % COLORES.length], t:0});
+  if (!animando){ animando = true; requestAnimationFrame(pasoConfeti); }
+}
+function pasoConfeti(){
+  pincel.clearRect(0, 0, lienzo.width, lienzo.height);
+  piezas = piezas.filter(p => p.y < lienzo.height + 20 && p.t < 150);
+  piezas.forEach(p => {
+    p.vy += .32; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.t++;
+    pincel.save(); pincel.translate(p.x, p.y); pincel.rotate(p.r); pincel.globalAlpha = Math.min(1, (150 - p.t) / 40);
+    pincel.fillStyle = p.c; pincel.fillRect(-p.w/2, -p.h/2, p.w, p.h); pincel.restore();
+  });
+  if (piezas.length) requestAnimationFrame(pasoConfeti); else { animando = false; pincel.clearRect(0, 0, lienzo.width, lienzo.height); }
+}
+function celebrarDia(){      // lluvia grande cuando se terminan todas las comidas de hoy
+  const w = innerWidth;
+  [.2, .5, .8].forEach((f, i) => setTimeout(() => confeti(w*f, innerHeight*.35, 70, 1.3), i*180));
+}
+function revisarFinDelDia(){
+  const lista = comidasDelDia(new Date().getDay()), hechos = S.hechos[hoyStr()] || {};
+  if (lista.length && lista.every(c => hechos[c.id])){ celebrarDia(); toast('¡Terminaste todas las comidas de hoy! 🎉'); return true; }
+  return false;
+}
 
 function toast(t){ const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 2400); }
 
 /* ---------- Aspecto de cada comida (color y emoji) ---------- */
 function tema(c){
   const n = c.nombre.toLowerCase(), h = minutos(c.hora);
-  if (/desayun/.test(n)) return {k:'des', e:'🥞'};
-  if (/colaci|merienda|snack|bocadillo/.test(n)) return {k:'col', e:'🍎'};
-  if (/cena|cenar/.test(n)) return {k:'cen', e:'🌙'};
-  if (/comida|almuerzo/.test(n)) return {k:'com', e:'🍲'};
-  if (h < 600) return {k:'des', e:'🥞'};
-  if (h < 780 || (h >= 900 && h < 1080)) return {k:'col', e:'🍎'};
-  if (h < 900) return {k:'com', e:'🍲'};
-  return {k:'cen', e:'🌙'};
+  const t = (k, e) => ({k, e, i:`img/ico-${k}.svg`});
+  if (/desayun/.test(n)) return t('des', '🥞');
+  if (/colaci|merienda|snack|bocadillo/.test(n)) return t('col', '🍎');
+  if (/cena|cenar/.test(n)) return t('cen', '🌙');
+  if (/comida|almuerzo/.test(n)) return t('com', '🍲');
+  if (h < 600) return t('des', '🥞');
+  if (h < 780 || (h >= 900 && h < 1080)) return t('col', '🍎');
+  if (h < 900) return t('com', '🍲');
+  return t('cen', '🌙');
 }
+const ilus = (img, cls = 'ilus') => `<img class="${cls}" src="img/${img}.svg" alt="">`;
 const textoAlimentos = c => c.alimentos.length ? c.alimentos.join(', ') : 'Sin alimentos asignados';
 
 /* ---------- Hoy ---------- */
@@ -92,7 +129,7 @@ function renderHoy(){
   renderAgua(); renderBarras();
 
   $('#bienvenida').innerHTML = S.visto ? '' : `<div class="card">
-    <h2>👋 ¡Bienvenida!</h2>
+    <div class="bienv">${ilus('hola', 'bienv-img')}<h2>¡Bienvenida!</h2></div>
     <ol class="pasos hint"><li>En <b>Alimentos</b> agrega lo que puedes comer.</li>
       <li>En <b>Mi semana</b> crea tus comidas, con su hora y sus días.</li>
       <li>Te avisaremos cuando sea la hora. Al terminar, toca <b>"Ya comí"</b>.</li></ol>
@@ -101,22 +138,22 @@ function renderHoy(){
   if (!lista.length){
     $('#sigue').innerHTML = '';
     $('#listaHoy').innerHTML = S.comidas.length
-      ? `<div class="vacio"><span class="grande">🌿</span>Hoy no tienes comidas programadas.<br><br><button class="btn" data-nueva="1">Agregar una comida</button></div>`
-      : `<div class="vacio"><span class="grande">🍽️</span>Aún no has creado ninguna comida.<br>Empieza con la primera: ponle nombre, hora y días.<br><br><button class="btn" data-nueva="1">＋ Crear mi primera comida</button></div>`;
+      ? `<div class="vacio">${ilus('vacio')}Hoy no tienes comidas programadas.<br><br><button class="btn" data-nueva="1">Agregar una comida</button></div>`
+      : `<div class="vacio">${ilus('vacio')}Aún no has creado ninguna comida.<br>Empieza con la primera: ponle nombre, hora y días.<br><br><button class="btn" data-nueva="1">＋ Crear mi primera comida</button></div>`;
     return;
   }
 
   const sig = lista.find(c => !hechos[c.id] && minutos(c.hora) >= ahora - 30);
   if (sig){
     const t = tema(sig);
-    $('#sigue').innerHTML = `<div class="sigue t-${t.k}" data-emoji="${t.e}">
+    $('#sigue').innerHTML = `<div class="sigue t-${t.k}"><img class="sigue-ico" src="${t.i}" alt="">
       <small>${minutos(sig.hora) - ahora <= 0 ? 'Es ahora' : 'Sigue'}</small>
       <h2>${esc(sig.nombre)}</h2>
       <div class="cuando">${fmt12(sig.hora)} · ${cuando(sig, ahora)}</div>
       <ul>${sig.alimentos.map(a => `<li>${esc(a)}</li>`).join('')}</ul>
       <button class="btn" data-hecho="${sig.id}">Ya comí ✓</button></div>`;
   } else if (nHechos === lista.length){
-    $('#sigue').innerHTML = `<div class="sigue t-col" data-emoji="🎉"><small>¡Muy bien!</small><h2>Terminaste hoy</h2><div class="cuando">Todas las comidas listas. ¡Descansa!</div></div>`;
+    $('#sigue').innerHTML = `<div class="sigue t-col fin"><img class="sigue-ico" src="img/feliz.svg" alt=""><small>¡Muy bien!</small><h2>Terminaste hoy</h2><div class="cuando">Todas las comidas listas. ¡Descansa!</div></div>`;
   } else $('#sigue').innerHTML = '';
 
   $('#listaHoy').innerHTML = lista.map(c => {
@@ -124,7 +161,7 @@ function renderHoy(){
     const tarde = !hecho && minutos(c.hora) < ahora - 30;
     const marca = hecho ? '<span class="etiqueta">Listo ✓</span>' : tarde ? '<span class="etiqueta tarde">Pendiente</span>' : '';
     return `<div class="comida t-${t.k} ${hecho?'hecha':''} ${tarde?'tarde':''}">
-      <div class="ico">${t.e}</div>
+      <div class="ico"><img src="${t.i}" alt=""></div>
       <div class="info"><div class="hora">${fmt12(c.hora)}</div><h3>${esc(c.nombre)}${marca}</h3>
         <div class="alim">${esc(textoAlimentos(c))}${c.nota ? ' · 📝 ' + esc(c.nota) : ''}</div></div>
       <div class="acc"><button class="btn chico btn-hecho ${hecho?'sec':'ok'}" data-hecho="${c.id}">${hecho ? 'Deshacer' : 'Ya comí ✓'}</button></div></div>`;
@@ -135,8 +172,12 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-hecho]');
   if (b){
     const id = b.dataset.hecho, k = hoyStr(); S.hechos[k] = S.hechos[k] || {};
-    if (S.hechos[k][id]) delete S.hechos[k][id]; else { S.hechos[k][id] = true; toast('¡Muy bien! 🎉'); }
-    save(); renderHoy(); return;
+    const r = b.getBoundingClientRect();
+    if (S.hechos[k][id]) delete S.hechos[k][id];
+    else { S.hechos[k][id] = true; confeti(r.left + r.width/2, r.top + r.height/2, 45); }
+    save(); renderHoy();
+    if (S.hechos[k][id] && !revisarFinDelDia()) toast('¡Muy bien! 🎉');
+    return;
   }
   const v = e.target.closest('[data-vaso]');
   if (v){ const k = hoyStr(), n = +v.dataset.vaso; S.agua[k] = (S.agua[k] || 0) === n ? n - 1 : n; save(); renderAgua(); return; }
@@ -148,16 +189,16 @@ document.addEventListener('click', e => {
 /* ---------- Semana ---------- */
 let diaSel = new Date().getDay();
 function tarjetaMini(c){ const t = tema(c);
-  return `<div class="mini t-${t.k}" data-edit="${c.id}"><span class="hora">${fmt12(c.hora)}</span><b>${t.e} ${esc(c.nombre)}</b><small>${esc(c.alimentos.join(', '))}</small></div>`; }
+  return `<div class="mini t-${t.k}" data-edit="${c.id}"><span class="hora">${fmt12(c.hora)}</span><b><img src="${t.i}" alt="">${esc(c.nombre)}</b><small>${esc(c.alimentos.join(', '))}</small></div>`; }
 function renderSemana(){
   const hoy = new Date().getDay();
   $('#diasSemana').innerHTML = ORDEN.map(i => `<button data-d="${i}" class="${i===diaSel?'on':''} ${i===hoy?'hoy':''}">${DIAS[i]}</button>`).join('');
   const lista = comidasDelDia(diaSel);
   $('#listaSemana').innerHTML = lista.length ? lista.map(c => { const t = tema(c); return `
-    <div class="comida editable t-${t.k}" data-edit="${c.id}"><div class="ico">${t.e}</div>
+    <div class="comida editable t-${t.k}" data-edit="${c.id}"><div class="ico"><img src="${t.i}" alt=""></div>
       <div class="info"><div class="hora">${fmt12(c.hora)}</div><h3>${esc(c.nombre)}</h3><div class="alim">${esc(textoAlimentos(c))}</div></div>
       <span class="lapiz">✏️</span></div>`; }).join('')
-    : `<div class="vacio"><span class="grande">🍽️</span>No hay comidas este día.<br>Toca "Agregar comida" para crear una.</div>`;
+    : `<div class="vacio">${ilus('vacio')}No hay comidas este día.<br>Toca "Agregar comida" para crear una.</div>`;
   const NOMBRES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   $('#tablero').innerHTML = ORDEN.map(i => `<div class="col-dia ${i===hoy?'hoy':''}">
     <header><b>${NOMBRES[i]}</b><button class="mas" data-mas="${i}" aria-label="Agregar comida el ${NOMBRES[i]}">＋</button></header>
@@ -219,7 +260,7 @@ function agregarAlimento(v){
 function renderAlimentos(){
   $('#listaAlimentos').innerHTML = S.catalogo.length
     ? S.catalogo.map(a => `<span class="chip">${esc(a)}<span class="x" data-del="${esc(a)}" role="button" aria-label="Quitar ${esc(a)}">✕</span></span>`).join('')
-    : `<div class="vacio" style="width:100%"><span class="grande">🥣</span>Aún no hay alimentos.<br>Escribe uno arriba o toca una idea.</div>`;
+    : `<div class="vacio" style="width:100%">${ilus('vacio')}Aún no hay alimentos.<br>Escribe uno arriba o toca una idea.</div>`;
   const sug = SUGERENCIAS.filter(s => !S.catalogo.some(a => a.toLowerCase() === s.toLowerCase()));
   $('#sugerencias').innerHTML = sug.map(s => `<button class="chip sug" data-sug="${esc(s)}">＋ ${esc(s)}</button>`).join('');
   $('#sugTitulo').hidden = $('#sugerencias').hidden = !sug.length;
@@ -276,7 +317,7 @@ function mostrarAlerta(c, ahora){
 $('#alertaCerrar').onclick = () => $('#alerta').close();
 $('#alertaListo').onclick = () => {
   const k = hoyStr(); S.hechos[k] = S.hechos[k] || {}; S.hechos[k][alertaId] = true;
-  save(); renderHoy(); $('#alerta').close(); toast('¡Muy bien! 🎉');
+  save(); renderHoy(); $('#alerta').close(); if (!revisarFinDelDia()) { confeti(innerWidth/2, innerHeight/2, 60); toast('¡Muy bien! 🎉'); }
 };
 function avisar(c){
   const ahora = ahoraMin();
@@ -307,6 +348,8 @@ $('#alarmaCal').checked = S.alarmaCal !== false;
 $('#alarmaCal').onchange = e => { S.alarmaCal = e.target.checked; save(); cambio(); toast('Guardado ✓'); };
 $('#nombreUsuario').value = S.nombre;
 $('#nombreUsuario').oninput = e => { S.nombre = e.target.value.trim(); save(); renderHoy(); };
+$('#letra').value = S.letra;
+$('#letra').onchange = e => { S.letra = e.target.value; save(); aplicarLetra(); };
 $('#tema').value = S.tema;
 $('#tema').onchange = e => { S.tema = e.target.value; save(); aplicarTema(); };
 

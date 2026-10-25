@@ -29,7 +29,10 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:17px/1.45 "Nunito","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+html[data-letra="grande"]{font-size:18.5px}
+html[data-letra="enorme"]{font-size:21px}
+body{background:radial-gradient(620px 460px at 100% 100%,rgba(236,72,153,.12),transparent 62%),radial-gradient(560px 460px at 0 72%,rgba(124,58,237,.12),transparent 62%),var(--bg);
+  background-attachment:fixed;color:var(--ink);font:1.0625rem/1.45 "Nunito","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
   padding-bottom:calc(88px + env(safe-area-inset-bottom));min-height:100vh}
 button{font:inherit;cursor:pointer}
 h1,h2,h3,p{margin:0}
@@ -46,6 +49,10 @@ h1,h2,h3,p{margin:0}
 .contenido{padding-bottom:24px}
 .flota{margin-top:-46px;position:relative}
 .view{display:none}.view.on{display:block;animation:sube .25s ease}
+@keyframes flota{50%{transform:translateY(-6px)}}
+@keyframes aparece{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes velo{from{opacity:0}to{opacity:1}}
+#confeti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
 @keyframes sube{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 /* ---------- Navegación ---------- */
@@ -76,7 +83,9 @@ nav button.on svg{stroke-width:2.4}
 /* próxima comida */
 .sigue{border-radius:var(--radius);padding:18px;margin:0 0 14px;color:#fff;box-shadow:var(--shadow);
   background:linear-gradient(135deg,var(--c),var(--c2,var(--c)));position:relative;overflow:hidden}
-.sigue::after{content:attr(data-emoji);position:absolute;right:-6px;bottom:-18px;font-size:6rem;opacity:.22}
+.sigue-ico{position:absolute;right:10px;bottom:8px;width:92px;height:92px;animation:flota 3.2s ease-in-out infinite}
+.sigue.fin .sigue-ico{width:112px;height:112px}
+.sigue ul,.sigue .cuando{padding-right:90px}
 .sigue small{font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.9}
 .sigue h2{font-size:1.5rem;margin:2px 0 2px}
 .sigue .cuando{font-size:1.05rem;font-weight:700}
@@ -91,7 +100,8 @@ nav button.on svg{stroke-width:2.4}
 .t-otro{--c:var(--otro);--c2:#4b5563;--s:var(--otro-s)}
 .comida{display:flex;gap:14px;align-items:center;background:var(--card);border-radius:var(--radius);padding:14px 16px;
   margin:0 0 12px;box-shadow:var(--shadow);border-left:7px solid var(--c);position:relative}
-.comida .ico{flex:none;width:54px;height:54px;border-radius:18px;background:var(--s);display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+.comida .ico{flex:none;width:58px;height:58px;border-radius:18px;background:var(--s);display:flex;align-items:center;justify-content:center}
+.comida .ico img{width:40px;height:40px}
 .comida .info{flex:1;min-width:0}
 .comida .hora{font-weight:800;color:var(--c);font-size:.95rem}
 .comida h3{font-size:1.15rem;font-weight:800;line-height:1.2}
@@ -107,6 +117,8 @@ nav button.on svg{stroke-width:2.4}
 
 /* botones */
 .btn{border:0;border-radius:16px;padding:12px 18px;font-weight:800;color:#fff;background:var(--grad);box-shadow:0 4px 14px rgba(124,58,237,.32)}
+.btn{transition:transform .15s,box-shadow .2s,filter .2s}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
 .btn:active{transform:scale(.97)}
 .btn.sec{background:var(--bg2);color:var(--brand);box-shadow:none}
 .btn.ok{background:var(--morado);background:linear-gradient(135deg,#7c3aed,#a855f7)}
@@ -124,6 +136,7 @@ nav button.on svg{stroke-width:2.4}
 .dias button.hoy::after{content:"";position:absolute;left:50%;bottom:3px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--rosa)}
 .dias button.on.hoy::after{background:#fff}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip,.dias button,nav button,.comida{transition:background .2s,color .2s,border-color .2s,opacity .3s,transform .15s}
 .chip{border:2px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:99px;font-weight:700;font-size:.95rem}
 .chip.on{background:var(--morado);color:#fff;border-color:var(--morado)}
 .chip.sug{border-style:dashed;color:var(--muted)}
@@ -164,6 +177,7 @@ label{display:block;font-weight:800;font-size:.9rem;margin:14px 0 6px}
 .mini:hover{transform:translateY(-2px)}
 .mini .hora{font-size:.78rem;font-weight:800;color:var(--c)}
 .mini b{display:block;line-height:1.2}
+.mini b img{width:18px;height:18px;vertical-align:-3px;margin-right:5px}
 .mini small{display:block;color:var(--muted);font-size:.8rem}
 .col-dia .nada{color:var(--muted);font-size:.85rem;text-align:center;padding:14px 0}
 
@@ -171,6 +185,8 @@ label{display:block;font-weight:800;font-size:.9rem;margin:14px 0 6px}
 dialog{border:0;border-radius:28px;padding:20px;width:min(560px,94vw);background:var(--card);color:var(--ink);max-height:92vh;box-shadow:0 20px 60px rgba(0,0,0,.45)}
 dialog::backdrop{background:rgba(12,6,24,.6);backdrop-filter:blur(3px)}
 dialog h2{font-size:1.35rem;margin-bottom:2px}
+dialog[open]{animation:aparece .28s cubic-bezier(.2,.9,.3,1.1)}
+dialog[open]::backdrop{animation:velo .25s ease}
 dialog .row.fin{margin-top:20px;justify-content:space-between}
 #alerta{text-align:center;width:min(380px,92vw);padding:0;overflow:hidden}
 #alerta img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
@@ -181,7 +197,11 @@ dialog .row.fin{margin-top:20px;justify-content:space-between}
 
 /* varios */
 .vacio{text-align:center;color:var(--muted);padding:30px 12px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
-.vacio .grande{font-size:3rem;display:block;margin-bottom:6px}
+.ilus{display:block;width:120px;height:120px;margin:0 auto 6px;animation:flota 3.4s ease-in-out infinite}
+.bienv{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.bienv-img{width:72px;height:72px;animation:flota 3.4s ease-in-out infinite}
+.top-pj{position:absolute;right:20px;top:-6px;width:92px;height:92px;animation:flota 3.6s ease-in-out infinite}
+.top h1,.top p{padding-right:84px}
 .aviso{background:linear-gradient(135deg,#f5e8ff,#ffe3f1);color:#3b1250;border-radius:var(--radius);padding:14px 16px;margin:0 0 14px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center}
 .aviso b{display:block}
 @media (prefers-color-scheme:dark){:root:not([data-theme="claro"]) .aviso{background:linear-gradient(135deg,#2b1747,#46163a);color:#f4eefc}}
@@ -204,6 +224,8 @@ dialog .row.fin{margin-top:20px;justify-content:space-between}
   nav button.on{background:var(--bg2)}
   .top{border-radius:0 0 40px 40px;padding-bottom:74px}
   .top h1{font-size:2.2rem}
+  .top-pj{width:118px;height:118px;right:36px;top:-14px}
+  .top h1,.top p{padding-right:140px}
   .top > div,.contenido{max-width:1240px;padding:0 36px}
   .grid-hoy{display:grid;grid-template-columns:370px 1fr;gap:24px;align-items:start}
   .grid-hoy .lateral{position:sticky;top:16px}
