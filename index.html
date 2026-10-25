@@ -159,8 +159,8 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
     <h2 style="margin-top:0" id="dlgTitulo">Comida</h2>
     <label for="cNombre">Nombre</label>
     <input id="cNombre" required placeholder="Ej. Desayuno">
-    <label for="cHora">Hora</label>
-    <input id="cHora" type="time" required>
+    <label for="cHH">Hora</label>
+    <div class="row" style="flex-wrap:nowrap"><select id="cHH"></select><select id="cMM"></select></div>
     <label>Días</label>
     <div class="days" id="cDias"></div>
     <label>Alimentos</label>
@@ -267,13 +267,16 @@ $('#listaSemana').addEventListener('click', e => { if (e.target.dataset.edit) ab
 $('#nuevaComida').onclick = () => abrirComida(null);
 
 /* ---------- Editor de comida ---------- */
+$('#cHH').innerHTML = Array.from({length:24}, (_,h) => `<option value="${h}">${h%12||12} ${h<12?'a.m.':'p.m.'}</option>`).join('');
+$('#cMM').innerHTML = Array.from({length:60}, (_,m) => `<option value="${pad(m)}">${pad(m)}</option>`).join('');
 let editando = null, selDias = [], selAl = [];
 function abrirComida(id){
   editando = id;
   const c = id ? S.comidas.find(x => x.id === id) : null;
   $('#dlgTitulo').textContent = c ? 'Editar comida' : 'Nueva comida';
   $('#cNombre').value = c ? c.nombre : '';
-  $('#cHora').value = c ? c.hora : '12:00';
+  const [hh, mm] = (c ? c.hora : '12:00').split(':');
+  $('#cHH').value = String(+hh); $('#cMM').value = mm;
   $('#cNota').value = c ? c.nota : '';
   selDias = c ? [...c.dias] : [diaSel];
   selAl = c ? [...c.alimentos] : [];
@@ -298,7 +301,7 @@ $('#cBorrar').onclick = () => {
 };
 $('#formComida').addEventListener('submit', e => {
   if (!selDias.length){ e.preventDefault(); toast('Elige al menos un día'); return; }
-  const datos = {nombre:$('#cNombre').value.trim(), hora:$('#cHora').value, dias:[...selDias].sort(), alimentos:selAl, nota:$('#cNota').value.trim()};
+  const datos = {nombre:$('#cNombre').value.trim(), hora:`${pad(+$('#cHH').value)}:${$('#cMM').value}`, dias:[...selDias].sort(), alimentos:selAl, nota:$('#cNota').value.trim()};
   if (editando) Object.assign(S.comidas.find(c => c.id === editando), datos);
   else S.comidas.push({id:uid(), ...datos});
   save(); cambio(); renderTodo();
